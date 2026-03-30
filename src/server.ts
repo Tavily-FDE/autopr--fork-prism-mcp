@@ -986,7 +986,7 @@ export function createSandboxServer() {
 
   // Register all tool listings unconditionally
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [...BASE_TOOLS, TAVILY_WEB_SEARCH_TOOL, ...buildSessionMemoryTools([]), ...AGENT_REGISTRY_TOOLS],
+    tools: [...BASE_TOOLS, ...(TAVILY_API_KEY ? [TAVILY_WEB_SEARCH_TOOL] : []), ...buildSessionMemoryTools([]), ...AGENT_REGISTRY_TOOLS],
   }));
 
   // Register prompts listing so scanners see resume_session

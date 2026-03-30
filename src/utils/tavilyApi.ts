@@ -30,12 +30,14 @@ export async function performTavilySearchRaw(
   const client = getClient();
 
   const response = await client.search(query, {
-    maxResults: Math.min(count, 20),
+    maxResults: Math.min(count + offset, 20),
     searchDepth: "basic",
     topic: "general",
   });
 
-  // Tavily doesn't natively support offset; trim the front when offset > 0
+  // Tavily doesn't natively support offset; trim the front when offset > 0.
+  // Note: if count + offset > 20, fewer than `count` results will be returned
+  // due to Tavily's 20-result maximum per request.
   if (offset > 0 && response.results) {
     response.results = response.results.slice(offset);
   }

@@ -58,7 +58,7 @@ if (!BRAVE_API_KEY) {
 
 export const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 if (!TAVILY_API_KEY) {
-  console.error("Info: TAVILY_API_KEY not set. Tavily web search tool will be unavailable.");
+  console.info("Info: TAVILY_API_KEY not set. Tavily web search tool will be unavailable.");
 }
 
 // ─── Optional: Google Gemini API Key ──────────────────────────
