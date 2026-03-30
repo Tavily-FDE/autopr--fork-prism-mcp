@@ -73,7 +73,7 @@ import {
   WATCHDOG_INTERVAL_MS, WATCHDOG_STALE_MIN, WATCHDOG_FROZEN_MIN,
   WATCHDOG_OFFLINE_MIN, WATCHDOG_LOOP_THRESHOLD,
   PRISM_SCHEDULER_ENABLED, PRISM_SCHEDULER_INTERVAL_MS,
-  PRISM_SCHOLAR_ENABLED,
+  PRISM_SCHOLAR_ENABLED, TAVILY_API_KEY,
 } from "./config.js";
 import { startWatchdog, drainAlerts } from "./hivemindWatchdog.js";
 import { startScheduler, startScholarScheduler } from "./backgroundScheduler.js";
@@ -110,6 +110,8 @@ import {
   codeModeTransformHandler,
   braveAnswersHandler,
   researchPaperAnalysisHandler,
+  TAVILY_WEB_SEARCH_TOOL,
+  tavilyWebSearchHandler,
 } from "./tools/index.js";
 
 // Session memory tools — only used if Supabase is configured
@@ -351,6 +353,8 @@ export function createServer() {
   // still prevent execution without valid Supabase credentials.
   const ALL_TOOLS: Tool[] = [
     ...BASE_TOOLS,
+    // Tavily web search — only when TAVILY_API_KEY is set
+    ...(TAVILY_API_KEY ? [TAVILY_WEB_SEARCH_TOOL] : []),
     ...SESSION_MEMORY_TOOLS,
     // v3.0: Agent Hivemind tools — only when PRISM_ENABLE_HIVEMIND=true
     ...(PRISM_ENABLE_HIVEMIND ? AGENT_REGISTRY_TOOLS : []),
@@ -745,6 +749,10 @@ export function createServer() {
           case "gemini_research_paper_analysis":
             result = await researchPaperAnalysisHandler(args); break;
 
+          case "tavily_web_search":
+            if (!TAVILY_API_KEY) throw new Error("Tavily search not configured. Set TAVILY_API_KEY.");
+            result = await tavilyWebSearchHandler(args); break;
+
           // ── Session Memory Tools (only callable when Supabase is configured) ──
           // REVIEWER NOTE: Even though these tools won't appear in the
           // tool list without Supabase, we still guard each handler call
@@ -978,7 +986,7 @@ export function createSandboxServer() {
 
   // Register all tool listings unconditionally
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [...BASE_TOOLS, ...buildSessionMemoryTools([]), ...AGENT_REGISTRY_TOOLS],
+    tools: [...BASE_TOOLS, TAVILY_WEB_SEARCH_TOOL, ...buildSessionMemoryTools([]), ...AGENT_REGISTRY_TOOLS],
   }));
 
   // Register prompts listing so scanners see resume_session

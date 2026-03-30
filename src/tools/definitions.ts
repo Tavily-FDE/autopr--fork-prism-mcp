@@ -105,6 +105,39 @@ export const WEB_SEARCH_TOOL: Tool = {
   },
 };
 
+// ─── Tavily Web Search Tool ───────────────────────────────────
+
+// Tavily-powered web search — alternative to brave_web_search.
+// Only registered when TAVILY_API_KEY is set. Same query/count/offset schema
+// as brave_web_search for interface parity.
+export const TAVILY_WEB_SEARCH_TOOL: Tool = {
+  name: "tavily_web_search",
+  description:
+    "Performs a web search using the Tavily Search API, designed for LLM-optimized results. " +
+    "Ideal for general queries, recent events, or when you need diverse web sources with high relevance scoring. " +
+    "Supports pagination and returns up to 20 results per request.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "Search query (max 400 chars, 50 words)",
+      },
+      count: {
+        type: "number",
+        description: "Number of results (1-20, default 10)",
+        default: 10,
+      },
+      offset: {
+        type: "number",
+        description: "Pagination offset (default 0)",
+        default: 0,
+      },
+    },
+    required: ["query"],
+  },
+};
+
 // ─── Local/Business Search Tools ──────────────────────────────
 
 // Searches for physical businesses and places (restaurants, stores, services).
@@ -292,6 +325,18 @@ export const RESEARCH_PAPER_ANALYSIS_TOOL: Tool = {
 
 /** Validates arguments for brave_web_search */
 export function isBraveWebSearchArgs(
+  args: unknown
+): args is { query: string; count?: number; offset?: number } {
+  return (
+    typeof args === "object" &&
+    args !== null &&
+    "query" in args &&
+    typeof (args as { query: string }).query === "string"
+  );
+}
+
+/** Validates arguments for tavily_web_search (same shape as brave_web_search) */
+export function isTavilyWebSearchArgs(
   args: unknown
 ): args is { query: string; count?: number; offset?: number } {
   return (

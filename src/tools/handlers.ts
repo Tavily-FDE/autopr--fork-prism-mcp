@@ -21,8 +21,9 @@
  */
 
 import { performWebSearch, performWebSearchRaw, performLocalSearch, performLocalSearchRaw, performBraveAnswers } from "../utils/braveApi.js";
+import { performTavilySearch } from "../utils/tavilyApi.js";
 import { getLLMProvider } from "../utils/llm/factory.js";
-import { isBraveWebSearchArgs, isBraveLocalSearchArgs, isBraveAnswersArgs, isGeminiResearchPaperAnalysisArgs, isBraveWebSearchCodeModeArgs, isBraveLocalSearchCodeModeArgs, isCodeModeTransformArgs } from "./definitions.js";
+import { isBraveWebSearchArgs, isBraveLocalSearchArgs, isBraveAnswersArgs, isGeminiResearchPaperAnalysisArgs, isBraveWebSearchCodeModeArgs, isBraveLocalSearchCodeModeArgs, isCodeModeTransformArgs, isTavilyWebSearchArgs } from "./definitions.js";
 import { runInSandbox } from "../utils/executor.js";
 import { CODE_MODE_TEMPLATES, getTemplateNames } from "../templates/codeMode.js";
 import { debugLog } from "../utils/logger.js";
@@ -37,6 +38,21 @@ export async function webSearchHandler(args: unknown) {
 
   const { query, count = 10, offset = 0 } = args;
   const results = await performWebSearch(query, count, offset);
+
+  return {
+    content: [{ type: "text", text: results }],
+    isError: false,
+  };
+}
+
+/** Performs a web search via Tavily and returns formatted text results. */
+export async function tavilyWebSearchHandler(args: unknown) {
+  if (!isTavilyWebSearchArgs(args)) {
+    throw new Error("Invalid arguments for tavily_web_search");
+  }
+
+  const { query, count = 10, offset = 0 } = args;
+  const results = await performTavilySearch(query, count, offset);
 
   return {
     content: [{ type: "text", text: results }],

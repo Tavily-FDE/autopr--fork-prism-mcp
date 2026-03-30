@@ -52,6 +52,15 @@ if (!BRAVE_API_KEY) {
   console.error("Warning: BRAVE_API_KEY environment variable is missing. Search tools will return errors when called.");
 }
 
+// ─── Optional: Tavily Search API Key ──────────────────────────
+// Used by the tavily_web_search tool as an alternative search provider.
+// When set, the tavily_web_search tool is registered alongside Brave tools.
+
+export const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+if (!TAVILY_API_KEY) {
+  console.error("Info: TAVILY_API_KEY not set. Tavily web search tool will be unavailable.");
+}
+
 // ─── Optional: Google Gemini API Key ──────────────────────────
 // Used by the gemini_research_paper_analysis tool.
 // Without this, the tool will still appear but will error when called.
